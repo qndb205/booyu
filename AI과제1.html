@@ -1,0 +1,3240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>퇴근 후 계획 도우미</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --text: #252733;
+        --sub: #777b89;
+        --primary: #6667d9;
+        --primary-light: #eeeeff;
+        --border: #e8e9ef;
+        --danger: #dc5d6b;
+        --success: #49a475;
+        --warning: #e7a23c;
+        --high: #e95d68;
+        --normal: #e5a439;
+        --low: #65a978;
+        --shadow: 0 8px 28px rgba(40, 42, 60, 0.06);
+    }
+
+    body {
+        margin: 0;
+        font-family:
+            "Pretendard",
+            "Apple SD Gothic Neo",
+            "Noto Sans KR",
+            Arial,
+            sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    .app {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 26px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 22px;
+    }
+
+    .header-title h1 {
+        margin: 0 0 7px;
+        font-size: 28px;
+    }
+
+    .header-title p {
+        margin: 0;
+        color: var(--sub);
+        font-size: 14px;
+    }
+
+    .user-tabs {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+
+    .user-tab {
+        border: 1px solid var(--border);
+        background: white;
+        padding: 9px 13px;
+        border-radius: 12px;
+        color: var(--sub);
+    }
+
+    .user-tab.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        font-weight: 700;
+    }
+
+    .icon-btn {
+        border: 1px solid var(--border);
+        background: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        color: var(--sub);
+    }
+
+    .nav {
+        display: flex;
+        gap: 8px;
+        background: white;
+        width: max-content;
+        padding: 5px;
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        margin-bottom: 22px;
+    }
+
+    .nav button {
+        border: 0;
+        background: transparent;
+        padding: 10px 17px;
+        border-radius: 10px;
+        color: var(--sub);
+    }
+
+    .nav button.active {
+        color: var(--primary);
+        background: var(--primary-light);
+        font-weight: 700;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(300px, .8fr);
+        gap: 20px;
+    }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+    }
+
+    .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 16px;
+    }
+
+    .section-title h2,
+    .section-title h3 {
+        margin: 0;
+    }
+
+    .section-title h2 {
+        font-size: 23px;
+    }
+
+    .section-title h3 {
+        font-size: 18px;
+    }
+
+    .subtext {
+        color: var(--sub);
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .summary-box {
+        background: #f8f8fc;
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 15px;
+    }
+
+    .summary-box strong {
+        display: block;
+        font-size: 22px;
+        margin-top: 6px;
+    }
+
+    .summary-label {
+        font-size: 12px;
+        color: var(--sub);
+    }
+
+    .primary-btn,
+    .secondary-btn,
+    .danger-btn,
+    .small-btn {
+        border-radius: 11px;
+        padding: 10px 14px;
+        border: 0;
+        font-weight: 700;
+    }
+
+    .primary-btn {
+        background: var(--primary);
+        color: white;
+    }
+
+    .secondary-btn {
+        background: #f1f2f7;
+        color: #55596a;
+    }
+
+    .danger-btn {
+        background: #fff0f1;
+        color: var(--danger);
+    }
+
+    .small-btn {
+        padding: 7px 10px;
+        font-size: 12px;
+        background: #f1f2f7;
+        color: #5c6070;
+    }
+
+    .full-btn {
+        width: 100%;
+    }
+
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+    }
+
+    .task-card {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 13px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 15px;
+        background: white;
+        transition: .2s;
+    }
+
+    .task-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(45, 47, 68, .06);
+    }
+
+    .task-card.completed {
+        opacity: .58;
+        background: #f6f7f7;
+    }
+
+    .task-card.completed .task-name {
+        text-decoration: line-through;
+    }
+
+    .task-card.unscheduled {
+        border-color: #f0c6ca;
+        background: #fffafa;
+    }
+
+    .check-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid #d7d9e4;
+        background: white;
+        font-size: 18px;
+    }
+
+    .completed .check-btn {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+    }
+
+    .task-name {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .task-meta {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        align-items: center;
+        color: var(--sub);
+        font-size: 12px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .priority-high {
+        color: var(--high);
+        background: #fff0f1;
+    }
+
+    .priority-normal {
+        color: #a56e19;
+        background: #fff7e8;
+    }
+
+    .priority-low {
+        color: #4d875c;
+        background: #edf8f0;
+    }
+
+    .deadline-badge {
+        color: #8556b4;
+        background: #f5ecff;
+    }
+
+    .fixed-badge {
+        color: #397ea5;
+        background: #eaf6fd;
+    }
+
+    .task-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--sub);
+        border: 1px dashed #d9dbe4;
+        border-radius: 16px;
+    }
+
+    .empty .emoji {
+        font-size: 35px;
+        margin-bottom: 10px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .field.full {
+        grid-column: 1 / -1;
+    }
+
+    .field label {
+        font-size: 13px;
+        color: #555867;
+        font-weight: 700;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        padding: 11px 12px;
+        background: white;
+        color: var(--text);
+        outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 103, 217, .09);
+    }
+
+    .field textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    .help {
+        font-size: 11px;
+        color: #9295a2;
+    }
+
+    .plan-info {
+        padding: 13px;
+        background: var(--primary-light);
+        color: #5355a5;
+        border-radius: 13px;
+        line-height: 1.6;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+
+    .bottom-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .calendar-layout {
+        display: grid;
+        grid-template-columns: minmax(550px, 1.25fr) minmax(300px, .75fr);
+        gap: 20px;
+    }
+
+    .calendar-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .calendar-head h2 {
+        margin: 0;
+    }
+
+    .cal-btn {
+        border: 1px solid var(--border);
+        background: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+    }
+
+    .week-row,
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .week-row {
+        color: #9497a5;
+        font-size: 12px;
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    .week-row div {
+        padding: 7px;
+    }
+
+    .day-cell {
+        min-height: 105px;
+        border: 1px solid var(--border);
+        background: white;
+        padding: 8px;
+        margin: -0.5px;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .day-cell:hover {
+        background: #fafaff;
+    }
+
+    .day-cell.other-month {
+        color: #c4c6ce;
+        background: #fafafa;
+    }
+
+    .day-cell.today {
+        background: #f5f5ff;
+    }
+
+    .day-cell.selected {
+        outline: 2px solid var(--primary);
+        outline-offset: -2px;
+        z-index: 2;
+    }
+
+    .day-number {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .day-tasks {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .day-task {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #f1f2f7;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-size: 10px;
+        color: #676a78;
+    }
+
+    .day-task.completed {
+        opacity: .5;
+        text-decoration: line-through;
+    }
+
+    .more-count {
+        font-size: 10px;
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    .toast {
+        position: fixed;
+        left: 50%;
+        top: 28px;
+        transform: translate(-50%, -20px);
+        padding: 15px 22px;
+        border-radius: 15px;
+        color: white;
+        background: #3e4051;
+        box-shadow: 0 10px 32px rgba(0, 0, 0, .18);
+        opacity: 0;
+        pointer-events: none;
+        transition: .3s;
+        z-index: 9999;
+        font-weight: 700;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    .celebration {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        z-index: 9998;
+        opacity: 0;
+        transition: .25s;
+    }
+
+    .celebration.show {
+        opacity: 1;
+    }
+
+    .celebrate-card {
+        background: white;
+        border-radius: 24px;
+        padding: 28px 38px;
+        box-shadow: 0 18px 70px rgba(38, 40, 55, .2);
+        text-align: center;
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .celebrate-card .big {
+        font-size: 45px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(30, 31, 40, .42);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+    }
+
+    .modal {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 18px 70px rgba(0, 0, 0, .2);
+    }
+
+    .modal h3 {
+        margin-top: 0;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .user-setting-row {
+        display: grid;
+        grid-template-columns: 1fr 120px;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .user-setting-row input {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .warning-box {
+        background: #fff5f5;
+        border: 1px solid #f1d1d4;
+        color: #9a5057;
+        border-radius: 12px;
+        padding: 11px 13px;
+        font-size: 12px;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .selected-date-label {
+        font-size: 14px;
+        color: var(--sub);
+        margin-bottom: 14px;
+    }
+
+    .note-text {
+        font-size: 12px;
+        color: #7d808e;
+        margin-top: 5px;
+        white-space: pre-wrap;
+    }
+
+    .footer-note {
+        text-align: center;
+        padding: 24px 0 10px;
+        color: #a0a2ad;
+        font-size: 11px;
+    }
+
+    @media (max-width: 900px) {
+        .dashboard-grid,
+        .calendar-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .summary {
+            grid-template-columns: 1fr;
+        }
+
+        .header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .calendar-layout {
+            min-width: 0;
+        }
+
+        .calendar-wrap {
+            overflow-x: auto;
+        }
+
+        .calendar-inner {
+            min-width: 650px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <header class="header">
+        <div class="header-title">
+            <h1>🌙 퇴근 후 계획 도우미</h1>
+            <p>무엇부터 할지 고민하지 말고, 오늘 할 일에 하나씩 집중해요.</p>
+        </div>
+
+        <div class="user-tabs" id="userTabs"></div>
+    </header>
+
+    <nav class="nav">
+        <button id="todayNav" class="active" onclick="changeView('today')">
+            오늘 할 일
+        </button>
+        <button id="calendarNav" onclick="changeView('calendar')">
+            전체 캘린더
+        </button>
+    </nav>
+
+    <!-- 오늘 화면 -->
+    <section id="todayView">
+
+        <div class="dashboard-grid">
+
+            <div>
+
+                <div class="card">
+                    <div class="section-title">
+                        <div>
+                            <h2>오늘 할 일 ✨</h2>
+                            <div class="subtext" id="todayDateText"></div>
+                        </div>
+
+                        <button
+                            class="secondary-btn"
+                            onclick="renderAll()"
+                        >
+                            계획 다시 정리
+                        </button>
+                    </div>
+
+                    <div class="summary">
+                        <div class="summary-box">
+                            <span class="summary-label">오늘 할 일</span>
+                            <strong id="todayTaskCount">0개</strong>
+                        </div>
+
+                        <div class="summary-box">
+                            <span class="summary-label">완료</span>
+                            <strong id="doneCount">0개</strong>
+                        </div>
+
+                        <div class="summary-box">
+                            <span class="summary-label">22시까지 남은 시간</span>
+                            <strong id="remainingClock">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="plan-info" id="planInfo">
+                        일정은 마감시간과 중요도를 고려해 자동으로 정리돼요.
+                    </div>
+
+                    <div id="scheduleWarning"></div>
+
+                    <div class="task-list" id="todayTaskList"></div>
+
+                    <div class="bottom-actions">
+                        <button
+                            class="secondary-btn"
+                            onclick="moveIncompleteToTomorrow()"
+                        >
+                            미완료 모두 내일로 넘기기
+                        </button>
+
+                        <button
+                            class="secondary-btn"
+                            onclick="changeView('calendar')"
+                        >
+                            전체 캘린더 보기
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 할 일 등록 -->
+            <aside class="card">
+
+                <div class="section-title">
+                    <div>
+                        <h3>할 일 추가</h3>
+                        <div class="subtext">계획에 필요한 정보를 입력해주세요.</div>
+                    </div>
+                </div>
+
+                <form id="taskForm">
+
+                    <div class="form-grid">
+
+                        <div class="field full">
+                            <label for="taskTitle">할 일 이름 *</label>
+                            <input
+                                id="taskTitle"
+                                type="text"
+                                placeholder="예: 빨래 돌리기"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="taskDate">날짜 *</label>
+                            <input
+                                id="taskDate"
+                                type="date"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="taskFixedTime">고정 시간</label>
+                            <input
+                                id="taskFixedTime"
+                                type="time"
+                            >
+                            <span class="help">
+                                꼭 이 시간에 해야 하는 일만 입력
+                            </span>
+                        </div>
+
+                        <div class="field">
+                            <label for="taskDeadlineDate">마감 날짜</label>
+                            <input
+                                id="taskDeadlineDate"
+                                type="date"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="taskDeadlineTime">마감 시간</label>
+                            <input
+                                id="taskDeadlineTime"
+                                type="time"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="taskDuration">예상 소요시간 *</label>
+                            <select id="taskDuration" required>
+                                <option value="10">10분</option>
+                                <option value="15">15분</option>
+                                <option value="20">20분</option>
+                                <option value="30" selected>30분</option>
+                                <option value="40">40분</option>
+                                <option value="45">45분</option>
+                                <option value="60">1시간</option>
+                                <option value="90">1시간 30분</option>
+                                <option value="120">2시간</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="taskPriority">중요도 *</label>
+                            <select id="taskPriority" required>
+                                <option value="high">높음</option>
+                                <option value="normal" selected>보통</option>
+                                <option value="low">낮음</option>
+                            </select>
+                        </div>
+
+                        <div class="field full">
+                            <label for="taskMemo">메모</label>
+                            <textarea
+                                id="taskMemo"
+                                placeholder="필요한 내용을 자유롭게 적어주세요."
+                            ></textarea>
+                        </div>
+
+                        <div class="field full">
+                            <button
+                                class="primary-btn full-btn"
+                                type="submit"
+                            >
+                                + 계획에 추가하기
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </aside>
+
+        </div>
+
+    </section>
+
+    <!-- 캘린더 화면 -->
+    <section id="calendarView" class="hidden">
+
+        <div class="calendar-layout">
+
+            <div class="card calendar-wrap">
+
+                <div class="calendar-inner">
+
+                    <div class="calendar-head">
+                        <button
+                            class="cal-btn"
+                            onclick="changeMonth(-1)"
+                            aria-label="이전 달"
+                        >
+                            ‹
+                        </button>
+
+                        <h2 id="calendarTitle"></h2>
+
+                        <button
+                            class="cal-btn"
+                            onclick="changeMonth(1)"
+                            aria-label="다음 달"
+                        >
+                            ›
+                        </button>
+                    </div>
+
+                    <div class="week-row">
+                        <div>일</div>
+                        <div>월</div>
+                        <div>화</div>
+                        <div>수</div>
+                        <div>목</div>
+                        <div>금</div>
+                        <div>토</div>
+                    </div>
+
+                    <div
+                        class="calendar-grid"
+                        id="calendarGrid"
+                    ></div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="section-title">
+                    <div>
+                        <h3>선택한 날짜의 할 일</h3>
+                        <div
+                            class="selected-date-label"
+                            id="selectedDateLabel"
+                        ></div>
+                    </div>
+                </div>
+
+                <div id="calendarDayWarning"></div>
+
+                <div
+                    class="task-list"
+                    id="calendarDayTasks"
+                ></div>
+
+                <div class="bottom-actions">
+                    <button
+                        class="secondary-btn full-btn"
+                        onclick="setFormToSelectedDate()"
+                    >
+                        이 날짜에 할 일 추가
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <div class="footer-note">
+        일정 데이터는 현재 PC의 웹브라우저에 저장됩니다.
+    </div>
+
+</div>
+
+
+<!-- 사용자 설정 모달 -->
+<div id="userModal" class="modal-bg hidden">
+    <div class="modal">
+
+        <h3>사용자 설정</h3>
+
+        <p class="subtext">
+            최대 3명이 각자의 계획을 따로 관리할 수 있어요.
+            시작 시간은 퇴근 후 계획이 시작되는 기본 시간입니다.
+        </p>
+
+        <div id="userSettingRows"></div>
+
+        <div class="modal-actions">
+            <button
+                class="secondary-btn"
+                onclick="closeUserModal()"
+            >
+                취소
+            </button>
+
+            <button
+                class="primary-btn"
+                onclick="saveUserSettings()"
+            >
+                저장
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 수정 모달 -->
+<div id="editModal" class="modal-bg hidden">
+    <div class="modal">
+
+        <h3>할 일 수정</h3>
+
+        <div class="form-grid">
+
+            <div class="field full">
+                <label>할 일 이름</label>
+                <input id="editTitle">
+            </div>
+
+            <div class="field">
+                <label>날짜</label>
+                <input id="editDate" type="date">
+            </div>
+
+            <div class="field">
+                <label>고정 시간</label>
+                <input id="editFixedTime" type="time">
+            </div>
+
+            <div class="field">
+                <label>마감 날짜</label>
+                <input id="editDeadlineDate" type="date">
+            </div>
+
+            <div class="field">
+                <label>마감 시간</label>
+                <input id="editDeadlineTime" type="time">
+            </div>
+
+            <div class="field">
+                <label>예상 소요시간</label>
+                <select id="editDuration">
+                    <option value="10">10분</option>
+                    <option value="15">15분</option>
+                    <option value="20">20분</option>
+                    <option value="30">30분</option>
+                    <option value="40">40분</option>
+                    <option value="45">45분</option>
+                    <option value="60">1시간</option>
+                    <option value="90">1시간 30분</option>
+                    <option value="120">2시간</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>중요도</label>
+                <select id="editPriority">
+                    <option value="high">높음</option>
+                    <option value="normal">보통</option>
+                    <option value="low">낮음</option>
+                </select>
+            </div>
+
+            <div class="field full">
+                <label>메모</label>
+                <textarea id="editMemo"></textarea>
+            </div>
+
+        </div>
+
+        <div class="modal-actions">
+            <button
+                class="secondary-btn"
+                onclick="closeEditModal()"
+            >
+                취소
+            </button>
+
+            <button
+                class="primary-btn"
+                onclick="saveEditedTask()"
+            >
+                수정 저장
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+<div id="celebration" class="celebration">
+    <div class="celebrate-card" id="celebrateText"></div>
+</div>
+
+
+<script>
+/* =========================================================
+   기본 설정
+========================================================= */
+
+const STORAGE_KEY = "afterWorkPlanner_v1";
+const DAY_END = "22:00";
+const BUFFER_MINUTES = 5;
+
+let state = loadState();
+
+let currentView = "today";
+
+const now = new Date();
+
+let calendarYear = now.getFullYear();
+let calendarMonth = now.getMonth();
+
+let selectedCalendarDate = formatDate(now);
+
+let editingTaskId = null;
+
+
+/* =========================================================
+   상태 초기화
+========================================================= */
+
+function defaultState() {
+    return {
+        currentUserId: "user1",
+
+        users: [
+            {
+                id: "user1",
+                name: "나",
+                startTime: "18:30"
+            },
+            {
+                id: "user2",
+                name: "사용자 2",
+                startTime: "18:30"
+            },
+            {
+                id: "user3",
+                name: "사용자 3",
+                startTime: "18:30"
+            }
+        ],
+
+        tasks: []
+    };
+}
+
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) {
+            return defaultState();
+        }
+
+        const parsed = JSON.parse(saved);
+
+        if (
+            !parsed.users ||
+            !Array.isArray(parsed.users) ||
+            !parsed.tasks ||
+            !Array.isArray(parsed.tasks)
+        ) {
+            return defaultState();
+        }
+
+        return parsed;
+
+    } catch (e) {
+        return defaultState();
+    }
+}
+
+
+function saveState() {
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state)
+    );
+}
+
+
+/* =========================================================
+   날짜/시간 유틸
+========================================================= */
+
+function pad(n) {
+    return String(n).padStart(2, "0");
+}
+
+
+function formatDate(date) {
+    return (
+        date.getFullYear() +
+        "-" +
+        pad(date.getMonth() + 1) +
+        "-" +
+        pad(date.getDate())
+    );
+}
+
+
+function parseLocalDate(dateString) {
+    if (!dateString) return null;
+
+    const [y, m, d] = dateString
+        .split("-")
+        .map(Number);
+
+    return new Date(y, m - 1, d);
+}
+
+
+function getToday() {
+    return formatDate(new Date());
+}
+
+
+function addDays(dateString, days) {
+    const d = parseLocalDate(dateString);
+
+    d.setDate(d.getDate() + days);
+
+    return formatDate(d);
+}
+
+
+function toMinutes(time) {
+    if (!time) return null;
+
+    const [h, m] = time.split(":").map(Number);
+
+    return h * 60 + m;
+}
+
+
+function minutesToTime(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+
+    return `${pad(h)}:${pad(m)}`;
+}
+
+
+function minutesToReadable(minutes) {
+    if (minutes <= 0) {
+        return "0분";
+    }
+
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+
+    if (h === 0) return `${m}분`;
+
+    if (m === 0) return `${h}시간`;
+
+    return `${h}시간 ${m}분`;
+}
+
+
+function koreanDate(dateString) {
+    const d = parseLocalDate(dateString);
+
+    if (!d) return "";
+
+    const days = [
+        "일", "월", "화", "수", "목", "금", "토"
+    ];
+
+    return (
+        `${d.getFullYear()}년 ` +
+        `${d.getMonth() + 1}월 ` +
+        `${d.getDate()}일 ` +
+        `${days[d.getDay()]}요일`
+    );
+}
+
+
+function deadlineTimestamp(task) {
+    if (!task.deadlineDate) {
+        return Infinity;
+    }
+
+    const time =
+        task.deadlineTime || "23:59";
+
+    return new Date(
+        `${task.deadlineDate}T${time}:00`
+    ).getTime();
+}
+
+
+function isDeadlineOverdue(task) {
+    if (!task.deadlineDate) {
+        return false;
+    }
+
+    return (
+        deadlineTimestamp(task) <
+        Date.now() &&
+        !task.completed
+    );
+}
+
+
+/* =========================================================
+   사용자
+========================================================= */
+
+function currentUser() {
+    return (
+        state.users.find(
+            user =>
+                user.id === state.currentUserId
+        ) || state.users[0]
+    );
+}
+
+
+function switchUser(userId) {
+    state.currentUserId = userId;
+
+    saveState();
+    renderAll();
+}
+
+
+function renderUserTabs() {
+    const wrap =
+        document.getElementById("userTabs");
+
+    wrap.innerHTML = "";
+
+    state.users.forEach(user => {
+        const btn =
+            document.createElement("button");
+
+        btn.className =
+            "user-tab" +
+            (
+                user.id === state.currentUserId
+                ? " active"
+                : ""
+            );
+
+        btn.textContent = user.name;
+
+        btn.onclick = () =>
+            switchUser(user.id);
+
+        wrap.appendChild(btn);
+    });
+
+    const setting =
+        document.createElement("button");
+
+    setting.className = "icon-btn";
+    setting.innerHTML = "⚙️";
+    setting.title = "사용자 설정";
+    setting.onclick = openUserModal;
+
+    wrap.appendChild(setting);
+}
+
+
+function openUserModal() {
+    const wrap =
+        document.getElementById(
+            "userSettingRows"
+        );
+
+    wrap.innerHTML = "";
+
+    state.users.forEach((user, index) => {
+        const row =
+            document.createElement("div");
+
+        row.className = "user-setting-row";
+
+        row.innerHTML = `
+            <input
+                id="userName_${index}"
+                value="${escapeHtml(user.name)}"
+                placeholder="사용자 이름"
+            >
+
+            <input
+                id="userStart_${index}"
+                type="time"
+                value="${user.startTime || "18:30"}"
+                title="계획 시작 시간"
+            >
+        `;
+
+        wrap.appendChild(row);
+    });
+
+    document
+        .getElementById("userModal")
+        .classList.remove("hidden");
+}
+
+
+function closeUserModal() {
+    document
+        .getElementById("userModal")
+        .classList.add("hidden");
+}
+
+
+function saveUserSettings() {
+    state.users.forEach((user, index) => {
+        const name =
+            document
+                .getElementById(
+                    `userName_${index}`
+                )
+                .value
+                .trim();
+
+        const start =
+            document
+                .getElementById(
+                    `userStart_${index}`
+                )
+                .value;
+
+        user.name =
+            name || `사용자 ${index + 1}`;
+
+        user.startTime =
+            start || "18:30";
+    });
+
+    saveState();
+    closeUserModal();
+    renderAll();
+
+    showToast("사용자 설정을 저장했어요.");
+}
+
+
+/* =========================================================
+   업무 추가
+========================================================= */
+
+document
+    .getElementById("taskForm")
+    .addEventListener(
+        "submit",
+        function (event) {
+            event.preventDefault();
+
+            const title =
+                document
+                    .getElementById("taskTitle")
+                    .value
+                    .trim();
+
+            const date =
+                document
+                    .getElementById("taskDate")
+                    .value;
+
+            const fixedTime =
+                document
+                    .getElementById(
+                        "taskFixedTime"
+                    )
+                    .value;
+
+            const deadlineDate =
+                document
+                    .getElementById(
+                        "taskDeadlineDate"
+                    )
+                    .value;
+
+            const deadlineTime =
+                document
+                    .getElementById(
+                        "taskDeadlineTime"
+                    )
+                    .value;
+
+            const duration =
+                Number(
+                    document
+                        .getElementById(
+                            "taskDuration"
+                        )
+                        .value
+                );
+
+            const priority =
+                document
+                    .getElementById(
+                        "taskPriority"
+                    )
+                    .value;
+
+            const memo =
+                document
+                    .getElementById(
+                        "taskMemo"
+                    )
+                    .value
+                    .trim();
+
+            if (!title || !date) {
+                showToast(
+                    "할 일 이름과 날짜를 입력해주세요."
+                );
+                return;
+            }
+
+            if (
+                fixedTime &&
+                toMinutes(fixedTime) >=
+                toMinutes(DAY_END)
+            ) {
+                showToast(
+                    "22시 이후 일정은 배치할 수 없어요."
+                );
+                return;
+            }
+
+            const task = {
+                id:
+                    "task_" +
+                    Date.now() +
+                    "_" +
+                    Math.random()
+                        .toString(36)
+                        .slice(2),
+
+                userId:
+                    state.currentUserId,
+
+                title,
+                date,
+                fixedTime,
+                deadlineDate,
+                deadlineTime,
+                duration,
+                priority,
+                memo,
+
+                completed: false,
+
+                createdAt:
+                    Date.now()
+            };
+
+            state.tasks.push(task);
+
+            saveState();
+
+            event.target.reset();
+
+            document
+                .getElementById(
+                    "taskDate"
+                )
+                .value = getToday();
+
+            document
+                .getElementById(
+                    "taskDuration"
+                )
+                .value = "30";
+
+            document
+                .getElementById(
+                    "taskPriority"
+                )
+                .value = "normal";
+
+            showToast(
+                "계획에 추가했어요 ✨"
+            );
+
+            renderAll();
+        }
+    );
+
+
+/* =========================================================
+   자동 일정 배치
+========================================================= */
+
+/*
+    원칙
+    1. 고정 시간이 있는 일정은 해당 시간에 우선 배치
+    2. 나머지는 마감이 있는 일정 우선
+    3. 마감이 빠른 순
+    4. 중요도 높은 순
+    5. 일정 사이 5분 여유
+    6. 사용자 시작 시간부터 22:00까지만 배치
+*/
+
+function priorityScore(priority) {
+    if (priority === "high") return 3;
+    if (priority === "normal") return 2;
+
+    return 1;
+}
+
+
+function compareFlexibleTasks(a, b) {
+
+    const aHasDeadline =
+        !!a.deadlineDate;
+
+    const bHasDeadline =
+        !!b.deadlineDate;
+
+    if (
+        aHasDeadline !== bHasDeadline
+    ) {
+        return aHasDeadline ? -1 : 1;
+    }
+
+    if (
+        aHasDeadline &&
+        bHasDeadline
+    ) {
+        const diff =
+            deadlineTimestamp(a) -
+            deadlineTimestamp(b);
+
+        if (diff !== 0) {
+            return diff;
+        }
+    }
+
+    const priorityDiff =
+        priorityScore(b.priority) -
+        priorityScore(a.priority);
+
+    if (priorityDiff !== 0) {
+        return priorityDiff;
+    }
+
+    return (
+        a.createdAt -
+        b.createdAt
+    );
+}
+
+
+function getScheduledTasksForDate(
+    dateString,
+    userId = state.currentUserId
+) {
+
+    const user =
+        state.users.find(
+            u => u.id === userId
+        );
+
+    const startMinutes =
+        toMinutes(
+            user?.startTime || "18:30"
+        );
+
+    const endMinutes =
+        toMinutes(DAY_END);
+
+    const tasks =
+        state.tasks
+            .filter(
+                task =>
+                    task.userId === userId &&
+                    task.date === dateString
+            )
+            .map(task => ({
+                ...task,
+                scheduledStart: null,
+                scheduledEnd: null,
+                scheduleStatus: "waiting"
+            }));
+
+
+    const fixedTasks =
+        tasks
+            .filter(task => task.fixedTime)
+            .sort(
+                (a, b) =>
+                    toMinutes(a.fixedTime) -
+                    toMinutes(b.fixedTime)
+            );
+
+
+    const flexibleTasks =
+        tasks
+            .filter(task => !task.fixedTime)
+            .sort(compareFlexibleTasks);
+
+
+    const occupied = [];
+
+
+    fixedTasks.forEach(task => {
+
+        const start =
+            toMinutes(task.fixedTime);
+
+        const end =
+            start + Number(task.duration);
+
+        const beforeStart =
+            start < startMinutes;
+
+        const afterEnd =
+            end > endMinutes;
+
+        const overlap =
+            occupied.some(slot =>
+                (
+                    start <
+                    slot.end + BUFFER_MINUTES
+                ) &&
+                (
+                    end + BUFFER_MINUTES >
+                    slot.start
+                )
+            );
+
+        if (
+            beforeStart ||
+            afterEnd ||
+            overlap
+        ) {
+            task.scheduleStatus =
+                "conflict";
+
+            task.scheduledStart =
+                start;
+
+            task.scheduledEnd =
+                end;
+
+            return;
+        }
+
+        task.scheduleStatus =
+            "scheduled";
+
+        task.scheduledStart =
+            start;
+
+        task.scheduledEnd =
+            end;
+
+        occupied.push({
+            start,
+            end,
+            taskId: task.id
+        });
+
+        occupied.sort(
+            (a, b) =>
+                a.start - b.start
+        );
+    });
+
+
+    flexibleTasks.forEach(task => {
+
+        let cursor = startMinutes;
+
+        let placed = false;
+
+        while (
+            cursor +
+            Number(task.duration) <=
+            endMinutes
+        ) {
+
+            const proposedEnd =
+                cursor +
+                Number(task.duration);
+
+            const collision =
+                occupied.find(slot => {
+
+                    const proposedStartWithBuffer =
+                        cursor;
+
+                    const proposedEndWithBuffer =
+                        proposedEnd +
+                        BUFFER_MINUTES;
+
+                    const slotStartWithBuffer =
+                        slot.start;
+
+                    const slotEndWithBuffer =
+                        slot.end +
+                        BUFFER_MINUTES;
+
+                    return (
+                        proposedStartWithBuffer <
+                        slotEndWithBuffer &&
+                        proposedEndWithBuffer >
+                        slotStartWithBuffer
+                    );
+                });
+
+            if (!collision) {
+
+                task.scheduledStart =
+                    cursor;
+
+                task.scheduledEnd =
+                    proposedEnd;
+
+                task.scheduleStatus =
+                    "scheduled";
+
+                occupied.push({
+                    start: cursor,
+                    end: proposedEnd,
+                    taskId: task.id
+                });
+
+                occupied.sort(
+                    (a, b) =>
+                        a.start - b.start
+                );
+
+                placed = true;
+                break;
+            }
+
+            cursor =
+                collision.end +
+                BUFFER_MINUTES;
+        }
+
+        if (!placed) {
+            task.scheduleStatus =
+                "overflow";
+        }
+    });
+
+
+    const result = [
+        ...fixedTasks,
+        ...flexibleTasks
+    ];
+
+
+    result.sort((a, b) => {
+
+        if (
+            a.scheduledStart === null &&
+            b.scheduledStart === null
+        ) {
+            return compareFlexibleTasks(a, b);
+        }
+
+        if (a.scheduledStart === null) {
+            return 1;
+        }
+
+        if (b.scheduledStart === null) {
+            return -1;
+        }
+
+        return (
+            a.scheduledStart -
+            b.scheduledStart
+        );
+    });
+
+
+    return result;
+}
+
+
+/* =========================================================
+   오늘 화면
+========================================================= */
+
+function renderToday() {
+
+    const today = getToday();
+
+    document
+        .getElementById(
+            "todayDateText"
+        )
+        .textContent =
+        koreanDate(today);
+
+
+    const tasks =
+        getScheduledTasksForDate(
+            today
+        );
+
+
+    const incomplete =
+        tasks.filter(
+            task => !task.completed
+        );
+
+
+    const completed =
+        tasks.filter(
+            task => task.completed
+        );
+
+
+    document
+        .getElementById(
+            "todayTaskCount"
+        )
+        .textContent =
+        `${tasks.length}개`;
+
+
+    document
+        .getElementById(
+            "doneCount"
+        )
+        .textContent =
+        `${completed.length}개`;
+
+
+    document
+        .getElementById(
+            "remainingClock"
+        )
+        .textContent =
+        getRemainingUntilTen();
+
+
+    const totalDuration =
+        incomplete.reduce(
+            (sum, task) =>
+                sum +
+                Number(task.duration),
+            0
+        );
+
+
+    document
+        .getElementById(
+            "planInfo"
+        )
+        .innerHTML =
+        `
+            ${escapeHtml(currentUser().name)}님의 계획은
+            <b>${currentUser().startTime}</b>부터
+            <b>22:00</b>까지 배치합니다.<br>
+            마감 일정이 우선이며,
+            중요도를 고려하고,
+            일정 사이에는
+            <b>5분의 여유시간</b>을 둡니다.
+            ${
+                incomplete.length
+                ? `<br>남은 업무 예상 소요시간은 <b>${minutesToReadable(totalDuration)}</b>이에요.`
+                : ""
+            }
+        `;
+
+
+    renderScheduleWarning(
+        tasks,
+        "scheduleWarning"
+    );
+
+
+    renderTaskList(
+        tasks,
+        "todayTaskList",
+        true
+    );
+}
+
+
+function getRemainingUntilTen() {
+
+    const now =
+        new Date();
+
+    const end =
+        new Date();
+
+    end.setHours(
+        22,
+        0,
+        0,
+        0
+    );
+
+    if (
+        now >= end
+    ) {
+        return "오늘은 끝!";
+    }
+
+    const minutes =
+        Math.floor(
+            (
+                end.getTime() -
+                now.getTime()
+            ) /
+            60000
+        );
+
+    return minutesToReadable(
+        minutes
+    );
+}
+
+
+/* =========================================================
+   일정 목록 출력
+========================================================= */
+
+function renderTaskList(
+    tasks,
+    containerId,
+    showTomorrowButton = false
+) {
+
+    const wrap =
+        document.getElementById(
+            containerId
+        );
+
+    wrap.innerHTML = "";
+
+
+    if (!tasks.length) {
+        wrap.innerHTML = `
+            <div class="empty">
+                <div class="emoji">🌿</div>
+                아직 등록된 할 일이 없어요.<br>
+                오른쪽에서 첫 계획을 추가해보세요.
+            </div>
+        `;
+        return;
+    }
+
+
+    tasks.forEach(task => {
+
+        const original =
+            state.tasks.find(
+                item =>
+                    item.id === task.id
+            );
+
+        if (!original) return;
+
+
+        const card =
+            document.createElement("div");
+
+
+        const unscheduled =
+            task.scheduleStatus === "overflow" ||
+            task.scheduleStatus === "conflict";
+
+
+        card.className =
+            "task-card" +
+            (
+                original.completed
+                ? " completed"
+                : ""
+            ) +
+            (
+                unscheduled
+                ? " unscheduled"
+                : ""
+            );
+
+
+        let timeText = "";
+
+
+        if (
+            task.scheduledStart !== null
+        ) {
+            timeText =
+                `${minutesToTime(task.scheduledStart)} ~ ` +
+                `${minutesToTime(task.scheduledEnd)}`;
+        } else {
+            timeText =
+                "오늘 시간 안에 배치되지 못함";
+        }
+
+
+        const priorityLabel =
+            task.priority === "high"
+                ? "중요"
+                : task.priority === "low"
+                ? "낮음"
+                : "보통";
+
+
+        let deadlineHtml = "";
+
+        if (task.deadlineDate) {
+
+            let deadlineText =
+                `마감 ${task.deadlineDate}`;
+
+            if (task.deadlineTime) {
+                deadlineText +=
+                    ` ${task.deadlineTime}`;
+            }
+
+            deadlineHtml = `
+                <span class="badge deadline-badge">
+                    ${deadlineText}
+                </span>
+            `;
+        }
+
+
+        let fixedHtml = "";
+
+        if (task.fixedTime) {
+            fixedHtml = `
+                <span class="badge fixed-badge">
+                    고정 ${task.fixedTime}
+                </span>
+            `;
+        }
+
+
+        let issueHtml = "";
+
+        if (
+            task.scheduleStatus === "overflow"
+        ) {
+            issueHtml = `
+                <span class="badge priority-high">
+                    22시 이전 배치 불가
+                </span>
+            `;
+        }
+
+        if (
+            task.scheduleStatus === "conflict"
+        ) {
+            issueHtml = `
+                <span class="badge priority-high">
+                    고정 일정 충돌
+                </span>
+            `;
+        }
+
+
+        card.innerHTML = `
+
+            <button
+                class="check-btn"
+                title="완료 체크"
+                onclick="toggleTaskComplete('${task.id}')"
+            >
+                ${original.completed ? "✓" : ""}
+            </button>
+
+            <div>
+
+                <div class="task-name">
+                    ${escapeHtml(task.title)}
+                </div>
+
+                <div class="task-meta">
+
+                    <strong>
+                        ${timeText}
+                    </strong>
+
+                    <span>
+                        ${task.duration}분
+                    </span>
+
+                    <span
+                        class="badge priority-${task.priority}"
+                    >
+                        ${priorityLabel}
+                    </span>
+
+                    ${fixedHtml}
+                    ${deadlineHtml}
+                    ${issueHtml}
+
+                </div>
+
+                ${
+                    task.memo
+                    ? `
+                        <div class="note-text">
+                            ${escapeHtml(task.memo)}
+                        </div>
+                    `
+                    : ""
+                }
+
+            </div>
+
+            <div class="task-actions">
+
+                <button
+                    class="small-btn"
+                    onclick="openEditModal('${task.id}')"
+                >
+                    수정
+                </button>
+
+                ${
+                    showTomorrowButton &&
+                    !original.completed
+                    ? `
+                        <button
+                            class="small-btn"
+                            onclick="moveTaskToTomorrow('${task.id}')"
+                        >
+                            내일로
+                        </button>
+                    `
+                    : ""
+                }
+
+                <button
+                    class="small-btn"
+                    onclick="deleteTask('${task.id}')"
+                >
+                    삭제
+                </button>
+
+            </div>
+        `;
+
+
+        wrap.appendChild(card);
+    });
+}
+
+
+/* =========================================================
+   완료
+========================================================= */
+
+const praiseMessages = [
+    "최고다! 오늘도 하나 해냈어! 🎉",
+    "대단해! 하나씩 착착 끝내고 있어! 👏",
+    "좋아! 이 속도면 충분해 💪",
+    "완료! 지금 아주 잘하고 있어 ✨",
+    "멋진데? 또 하나 끝냈다! 🌟",
+    "해냈다! 체크 하나가 주는 뿌듯함 😎",
+    "오늘의 나, 꽤 멋지다! 🙌",
+    "좋아 좋아! 이대로 하나씩 가자 🥳"
+];
+
+
+function toggleTaskComplete(taskId) {
+
+    const task =
+        state.tasks.find(
+            item =>
+                item.id === taskId
+        );
+
+    if (!task) return;
+
+
+    const wasCompleted =
+        task.completed;
+
+
+    task.completed =
+        !task.completed;
+
+
+    saveState();
+
+
+    if (
+        !wasCompleted &&
+        task.completed
+    ) {
+        celebrate();
+    }
+
+
+    renderAll();
+}
+
+
+function celebrate() {
+
+    const message =
+        praiseMessages[
+            Math.floor(
+                Math.random() *
+                praiseMessages.length
+            )
+        ];
+
+
+    const box =
+        document.getElementById(
+            "celebrateText"
+        );
+
+
+    box.innerHTML = `
+        <span class="big">🎉</span>
+        ${message}
+    `;
+
+
+    const wrap =
+        document.getElementById(
+            "celebration"
+        );
+
+
+    wrap.classList.add("show");
+
+
+    setTimeout(() => {
+        wrap.classList.remove("show");
+    }, 1300);
+}
+
+
+/* =========================================================
+   내일로 넘기기
+========================================================= */
+
+function moveTaskToTomorrow(taskId) {
+
+    const task =
+        state.tasks.find(
+            item =>
+                item.id === taskId
+        );
+
+    if (!task) return;
+
+
+    task.date =
+        addDays(task.date, 1);
+
+
+    task.fixedTime =
+        task.fixedTime || "";
+
+
+    saveState();
+
+    showToast(
+        "내일 일정으로 옮겼어요."
+    );
+
+    renderAll();
+}
+
+
+function moveIncompleteToTomorrow() {
+
+    const today =
+        getToday();
+
+
+    const incomplete =
+        state.tasks.filter(
+            task =>
+                task.userId ===
+                    state.currentUserId &&
+                task.date === today &&
+                !task.completed
+        );
+
+
+    if (!incomplete.length) {
+        showToast(
+            "내일로 넘길 미완료 일정이 없어요."
+        );
+        return;
+    }
+
+
+    const ok =
+        confirm(
+            `${incomplete.length}개의 미완료 일정을 모두 내일로 넘길까요?`
+        );
+
+
+    if (!ok) return;
+
+
+    const tomorrow =
+        addDays(today, 1);
+
+
+    incomplete.forEach(task => {
+        task.date = tomorrow;
+    });
+
+
+    saveState();
+
+    showToast(
+        "미완료 일정을 모두 내일로 옮겼어요."
+    );
+
+    renderAll();
+}
+
+
+/* =========================================================
+   삭제
+========================================================= */
+
+function deleteTask(taskId) {
+
+    const task =
+        state.tasks.find(
+            item =>
+                item.id === taskId
+        );
+
+
+    if (!task) return;
+
+
+    const ok =
+        confirm(
+            `"${task.title}"을(를) 삭제할까요?`
+        );
+
+
+    if (!ok) return;
+
+
+    state.tasks =
+        state.tasks.filter(
+            task =>
+                task.id !== taskId
+        );
+
+
+    saveState();
+
+    showToast(
+        "할 일을 삭제했어요."
+    );
+
+    renderAll();
+}
+
+
+/* =========================================================
+   수정
+========================================================= */
+
+function openEditModal(taskId) {
+
+    const task =
+        state.tasks.find(
+            item =>
+                item.id === taskId
+        );
+
+
+    if (!task) return;
+
+
+    editingTaskId =
+        taskId;
+
+
+    document
+        .getElementById(
+            "editTitle"
+        )
+        .value =
+        task.title;
+
+
+    document
+        .getElementById(
+            "editDate"
+        )
+        .value =
+        task.date;
+
+
+    document
+        .getElementById(
+            "editFixedTime"
+        )
+        .value =
+        task.fixedTime || "";
+
+
+    document
+        .getElementById(
+            "editDeadlineDate"
+        )
+        .value =
+        task.deadlineDate || "";
+
+
+    document
+        .getElementById(
+            "editDeadlineTime"
+        )
+        .value =
+        task.deadlineTime || "";
+
+
+    document
+        .getElementById(
+            "editDuration"
+        )
+        .value =
+        String(task.duration);
+
+
+    document
+        .getElementById(
+            "editPriority"
+        )
+        .value =
+        task.priority;
+
+
+    document
+        .getElementById(
+            "editMemo"
+        )
+        .value =
+        task.memo || "";
+
+
+    document
+        .getElementById(
+            "editModal"
+        )
+        .classList.remove("hidden");
+}
+
+
+function closeEditModal() {
+
+    editingTaskId = null;
+
+    document
+        .getElementById(
+            "editModal"
+        )
+        .classList.add("hidden");
+}
+
+
+function saveEditedTask() {
+
+    const task =
+        state.tasks.find(
+            item =>
+                item.id ===
+                editingTaskId
+        );
+
+
+    if (!task) return;
+
+
+    const title =
+        document
+            .getElementById(
+                "editTitle"
+            )
+            .value
+            .trim();
+
+
+    const date =
+        document
+            .getElementById(
+                "editDate"
+            )
+            .value;
+
+
+    const fixedTime =
+        document
+            .getElementById(
+                "editFixedTime"
+            )
+            .value;
+
+
+    if (!title || !date) {
+        showToast(
+            "할 일 이름과 날짜를 입력해주세요."
+        );
+        return;
+    }
+
+
+    if (
+        fixedTime &&
+        toMinutes(fixedTime) >=
+        toMinutes(DAY_END)
+    ) {
+        showToast(
+            "22시 이후 일정은 배치할 수 없어요."
+        );
+        return;
+    }
+
+
+    task.title =
+        title;
+
+    task.date =
+        date;
+
+    task.fixedTime =
+        fixedTime;
+
+    task.deadlineDate =
+        document
+            .getElementById(
+                "editDeadlineDate"
+            )
+            .value;
+
+    task.deadlineTime =
+        document
+            .getElementById(
+                "editDeadlineTime"
+            )
+            .value;
+
+    task.duration =
+        Number(
+            document
+                .getElementById(
+                    "editDuration"
+                )
+                .value
+        );
+
+    task.priority =
+        document
+            .getElementById(
+                "editPriority"
+            )
+            .value;
+
+    task.memo =
+        document
+            .getElementById(
+                "editMemo"
+            )
+            .value
+            .trim();
+
+
+    saveState();
+
+    closeEditModal();
+
+    showToast(
+        "수정 내용을 저장했어요."
+    );
+
+    renderAll();
+}
+
+
+/* =========================================================
+   경고
+========================================================= */
+
+function renderScheduleWarning(
+    tasks,
+    containerId
+) {
+
+    const box =
+        document.getElementById(
+            containerId
+        );
+
+
+    if (!box) return;
+
+
+    const overflow =
+        tasks.filter(
+            task =>
+                task.scheduleStatus ===
+                "overflow"
+        );
+
+
+    const conflict =
+        tasks.filter(
+            task =>
+                task.scheduleStatus ===
+                "conflict"
+        );
+
+
+    const overdue =
+        tasks.filter(
+            task =>
+                isDeadlineOverdue(task)
+        );
+
+
+    let messages = [];
+
+
+    if (overflow.length) {
+        messages.push(
+            `${overflow.length}개의 일정은 22시 이전 빈 시간에 모두 배치할 수 없어요.`
+        );
+    }
+
+
+    if (conflict.length) {
+        messages.push(
+            `${conflict.length}개의 고정 일정이 다른 일정과 겹치거나 계획 가능 시간 밖에 있어요.`
+        );
+    }
+
+
+    if (overdue.length) {
+        messages.push(
+            `${overdue.length}개의 일정은 마감 시간이 지났어요.`
+        );
+    }
+
+
+    if (!messages.length) {
+        box.innerHTML = "";
+        return;
+    }
+
+
+    box.innerHTML = `
+        <div class="warning-box">
+            ⚠️ ${messages.join("<br>")}
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   화면 전환
+========================================================= */
+
+function changeView(view) {
+
+    currentView = view;
+
+
+    const todayView =
+        document.getElementById(
+            "todayView"
+        );
+
+
+    const calendarView =
+        document.getElementById(
+            "calendarView"
+        );
+
+
+    const todayNav =
+        document.getElementById(
+            "todayNav"
+        );
+
+
+    const calendarNav =
+        document.getElementById(
+            "calendarNav"
+        );
+
+
+    if (view === "today") {
+
+        todayView.classList.remove(
+            "hidden"
+        );
+
+        calendarView.classList.add(
+            "hidden"
+        );
+
+        todayNav.classList.add(
+            "active"
+        );
+
+        calendarNav.classList.remove(
+            "active"
+        );
+
+    } else {
+
+        todayView.classList.add(
+            "hidden"
+        );
+
+        calendarView.classList.remove(
+            "hidden"
+        );
+
+        todayNav.classList.remove(
+            "active"
+        );
+
+        calendarNav.classList.add(
+            "active"
+        );
+
+        renderCalendar();
+    }
+}
+
+
+/* =========================================================
+   캘린더
+========================================================= */
+
+function changeMonth(amount) {
+
+    calendarMonth += amount;
+
+
+    if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+    }
+
+
+    if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+    }
+
+
+    renderCalendar();
+}
+
+
+function renderCalendar() {
+
+    document
+        .getElementById(
+            "calendarTitle"
+        )
+        .textContent =
+        `${calendarYear}년 ${calendarMonth + 1}월`;
+
+
+    const grid =
+        document.getElementById(
+            "calendarGrid"
+        );
+
+
+    grid.innerHTML = "";
+
+
+    const firstDay =
+        new Date(
+            calendarYear,
+            calendarMonth,
+            1
+        );
+
+
+    const startDate =
+        new Date(
+            calendarYear,
+            calendarMonth,
+            1 - firstDay.getDay()
+        );
+
+
+    for (
+        let index = 0;
+        index < 42;
+        index++
+    ) {
+
+        const date =
+            new Date(startDate);
+
+        date.setDate(
+            startDate.getDate() +
+            index
+        );
+
+
+        const dateString =
+            formatDate(date);
+
+
+        const cell =
+            document.createElement(
+                "div"
+            );
+
+
+        let className =
+            "day-cell";
+
+
+        if (
+            date.getMonth() !==
+            calendarMonth
+        ) {
+            className +=
+                " other-month";
+        }
+
+
+        if (
+            dateString ===
+            getToday()
+        ) {
+            className +=
+                " today";
+        }
+
+
+        if (
+            dateString ===
+            selectedCalendarDate
+        ) {
+            className +=
+                " selected";
+        }
+
+
+        cell.className =
+            className;
+
+
+        const tasks =
+            state.tasks
+                .filter(
+                    task =>
+                        task.userId ===
+                            state.currentUserId &&
+                        task.date ===
+                            dateString
+                );
+
+
+        let taskPreview = "";
+
+
+        tasks
+            .slice(0, 3)
+            .forEach(task => {
+
+                taskPreview += `
+                    <div
+                        class="day-task ${task.completed ? "completed" : ""}"
+                    >
+                        ${escapeHtml(task.title)}
+                    </div>
+                `;
+            });
+
+
+        if (tasks.length > 3) {
+
+            taskPreview += `
+                <div class="more-count">
+                    + ${tasks.length - 3}개 더
+                </div>
+            `;
+        }
+
+
+        cell.innerHTML = `
+            <div class="day-number">
+                ${date.getDate()}
+            </div>
+
+            <div class="day-tasks">
+                ${taskPreview}
+            </div>
+        `;
+
+
+        cell.onclick =
+            function () {
+
+                selectedCalendarDate =
+                    dateString;
+
+
+                calendarYear =
+                    date.getFullYear();
+
+                calendarMonth =
+                    date.getMonth();
+
+
+                renderCalendar();
+            };
+
+
+        grid.appendChild(
+            cell
+        );
+    }
+
+
+    renderSelectedCalendarDay();
+}
+
+
+function renderSelectedCalendarDay() {
+
+    document
+        .getElementById(
+            "selectedDateLabel"
+        )
+        .textContent =
+        koreanDate(
+            selectedCalendarDate
+        );
+
+
+    const tasks =
+        getScheduledTasksForDate(
+            selectedCalendarDate
+        );
+
+
+    renderScheduleWarning(
+        tasks,
+        "calendarDayWarning"
+    );
+
+
+    renderTaskList(
+        tasks,
+        "calendarDayTasks",
+        false
+    );
+}
+
+
+function setFormToSelectedDate() {
+
+    document
+        .getElementById(
+            "taskDate"
+        )
+        .value =
+        selectedCalendarDate;
+
+
+    changeView("today");
+
+
+    document
+        .getElementById(
+            "taskTitle"
+        )
+        .focus();
+
+
+    showToast(
+        `${koreanDate(selectedCalendarDate)}에 추가할 할 일을 입력해주세요.`
+    );
+}
+
+
+/* =========================================================
+   토스트
+========================================================= */
+
+let toastTimer = null;
+
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+                toast.classList.remove(
+                    "show"
+                );
+            },
+            2200
+        );
+}
+
+
+/* =========================================================
+   HTML escape
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
+
+
+/* =========================================================
+   전체 렌더링
+========================================================= */
+
+function renderAll() {
+
+    renderUserTabs();
+
+    renderToday();
+
+    if (
+        currentView ===
+        "calendar"
+    ) {
+        renderCalendar();
+    }
+}
+
+
+/* =========================================================
+   최초 실행
+========================================================= */
+
+function init() {
+
+    const today =
+        getToday();
+
+
+    document
+        .getElementById(
+            "taskDate"
+        )
+        .value =
+        today;
+
+
+    selectedCalendarDate =
+        today;
+
+
+    renderAll();
+
+
+    /* 시간이 지나면 남은 시간 자동 갱신 */
+    setInterval(
+        () => {
+
+            document
+                .getElementById(
+                    "remainingClock"
+                )
+                .textContent =
+                getRemainingUntilTen();
+
+        },
+        60000
+    );
+}
+
+
+init();
+
+</script>
+
+</body>
+</html>
